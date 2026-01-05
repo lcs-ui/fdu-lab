@@ -214,8 +214,8 @@ func _xmlTree(ws *workspace.Workspace, parts []string) {
 	
 	xmlPath := parts[1]
 	
-	// 如果路径不包含目录，尝试从 ./files 目录读取
-	if !strings.Contains(xmlPath, string(filepath.Separator)) {
+	// 如果路径不是绝对路径，尝试从 ./files 目录读取
+	if !filepath.IsAbs(xmlPath) && !strings.HasPrefix(xmlPath, ".") {
 		xmlPath = filepath.Join("./files", xmlPath)
 	}
 	

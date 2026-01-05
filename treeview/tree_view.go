@@ -51,11 +51,8 @@ func (tv *TreeView) renderNode(node TreeNode, prefix string, isLast bool, builde
 			// Calculate the prefix for child nodes
 			var childPrefix string
 			if prefix == "" {
-				if isLast || i == len(children)-1 {
-					childPrefix = "    "
-				} else {
-					childPrefix = "│   "
-				}
+				// For root node, use simple spacing
+				childPrefix = "    "
 			} else {
 				if isLast {
 					childPrefix = prefix + "    "

@@ -1,0 +1,3 @@
+dir-tree files
+xml-tree project.xml
+exit
