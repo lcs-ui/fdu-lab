@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="fdu-lab" type="editor">
+    <modules>
+        <module name="common">
+            <interface>Editor</interface>
+            <interface>Observer</interface>
+            <interface>WorkSpaceApi</interface>
+        </module>
+        <module name="workspace">
+            <class>Workspace</class>
+            <pattern>Observer Pattern</pattern>
+            <pattern>Memento Pattern</pattern>
+        </module>
+        <module name="editor">
+            <class>TextEditor</class>
+            <factory>EditorFactory</factory>
+        </module>
+        <module name="treeview">
+            <class>TreeView</class>
+            <adapter>DirectoryTreeAdapter</adapter>
+            <adapter>XMLTreeAdapter</adapter>
+            <pattern>Adapter Pattern</pattern>
+        </module>
+    </modules>
+    <features>
+        <feature>File Editing</feature>
+        <feature>Tree View Display</feature>
+        <feature>Log Management</feature>
+    </features>
+</project>

@@ -7,6 +7,7 @@ import (
 	"lab1/editor"
 	"lab1/log"
 	"lab1/storage"
+	"lab1/treeview"
 	"lab1/workspace"
 	"os"
 	"path/filepath"
@@ -99,6 +100,8 @@ func handleCommand(ws *workspace.Workspace, input string, debug bool) {
 		_exit(ws)
 	case "dir-tree": //完成
 		_dirTree(ws, parts)
+	case "xml-tree": //完成
+		_xmlTree(ws, parts)
 	case "append":
 		_append(ws, parts)
 	case "insert":
@@ -189,13 +192,50 @@ func _dirTree(ws *workspace.Workspace, parts []string) {
 		return
 	}
 
-	// 生成并打印目录树
-	tree, err := generateDirectoryTree(targetDir)
+	// 使用适配器模式生成目录树
+	adapter := treeview.NewDirectoryTreeAdapter(targetDir)
+	rootNode, err := adapter.GetRootNode()
 	if err != nil {
 		fmt.Printf("生成目录树失败: %v\n", err)
 		return
 	}
-	fmt.Print(tree)
+	
+	// 使用 TreeView 渲染树形结构
+	view := treeview.NewTreeView(rootNode)
+	fmt.Print(view.Render())
+}
+
+func _xmlTree(ws *workspace.Workspace, parts []string) {
+	// 确定目标XML文件
+	if len(parts) < 2 {
+		fmt.Println("请指定XML文件路径: xml-tree [path]")
+		return
+	}
+	
+	xmlPath := parts[1]
+	
+	// 如果路径不包含目录，尝试从 ./files 目录读取
+	if !strings.Contains(xmlPath, string(filepath.Separator)) {
+		xmlPath = filepath.Join("./files", xmlPath)
+	}
+	
+	// 验证文件是否存在
+	if _, err := os.Stat(xmlPath); err != nil {
+		fmt.Printf("文件不存在: %v\n", err)
+		return
+	}
+	
+	// 使用适配器模式生成XML树
+	adapter := treeview.NewXMLTreeAdapter(xmlPath)
+	rootNode, err := adapter.GetRootNode()
+	if err != nil {
+		fmt.Printf("解析XML文件失败: %v\n", err)
+		return
+	}
+	
+	// 使用 TreeView 渲染树形结构
+	view := treeview.NewTreeView(rootNode)
+	fmt.Print(view.Render())
 }
 
 func _LogOn(ws *workspace.Workspace, parts []string) {
@@ -406,64 +446,6 @@ func _init(ws *workspace.Workspace, parts []string) {
 	fmt.Printf("已创建新缓冲区: %s（未保存）\n", fileName)
 	if withLog {
 		fmt.Println("已自动添加日志标记 '# log'")
-	}
-}
-
-// generateDirectoryTree 生成指定目录的树形结构字符串
-func generateDirectoryTree(rootDir string) (string, error) {
-	// 获取目录下的所有条目（文件和子目录）
-	entries, err := os.ReadDir(rootDir)
-	if err != nil {
-		return "", err
-	}
-
-	var builder strings.Builder
-	// 递归构建目录树
-	buildTree(rootDir, entries, "", true, &builder)
-	return builder.String(), nil
-}
-
-func buildTree(root string, entries []os.DirEntry, prefix string, isLast bool, builder *strings.Builder) {
-	for i, entry := range entries {
-		// 判断是否为最后一个条目
-		isCurrentLast := i == len(entries)-1
-
-		// 绘制前缀和连接线（修复根目录第一个条目格式）
-		builder.WriteString(prefix)
-		if isCurrentLast {
-			builder.WriteString("└── ")
-		} else {
-			builder.WriteString("├── ")
-		}
-
-		// 写入条目名称
-		builder.WriteString(entry.Name())
-		builder.WriteString("\n")
-
-		// 递归处理子目录（保持不变）
-		if entry.IsDir() {
-			var childPrefix string
-			if prefix == "" {
-				if isCurrentLast {
-					childPrefix = "    "
-				} else {
-					childPrefix = "│   "
-				}
-			} else {
-				if isCurrentLast {
-					childPrefix = prefix + "    "
-				} else {
-					childPrefix = prefix + "│   "
-				}
-			}
-
-			subDir := filepath.Join(root, entry.Name())
-			subEntries, err := os.ReadDir(subDir)
-			if err != nil {
-				continue
-			}
-			buildTree(subDir, subEntries, childPrefix, isCurrentLast, builder)
-		}
 	}
 }
 
